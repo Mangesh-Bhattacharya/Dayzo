@@ -1,3 +1,18 @@
+# Dayzo
+
+One number. Every single day. Enter your monthly income and Dayzo shows what you can spend today, shrinking as you log spends.
+Private (all data stays on the device), works offline, no accounts, no ads.
+
+**Try it now (no sign-up):**
+- Website: https://mangesh-bhattacharya.github.io/Dayzo/
+- Web app, installs to your home screen: https://mangesh-bhattacharya.github.io/Dayzo/app/
+  (iPhone: open in Safari, Share, Add to Home Screen)
+- Android APK test build: see the [Releases](https://github.com/Mangesh-Bhattacharya/Dayzo/releases) page
+
+Feedback and bug reports are welcome in [Issues](https://github.com/Mangesh-Bhattacharya/Dayzo/issues).
+
+---
+
 # Dayzo - daily budget app
 
 Enter monthly income, get one daily number (income / days in month), log spends, watch the number drop.
