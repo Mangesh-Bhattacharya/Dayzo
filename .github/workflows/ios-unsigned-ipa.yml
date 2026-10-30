@@ -1,0 +1,32 @@
+# EXPERIMENTAL and not yet run: builds an unsigned .ipa on a free GitHub macOS runner.
+# Sign/install it yourself with AltStore or Sideloadly using a free Apple ID (7-day signing, max 3 apps).
+name: Build unsigned iOS IPA (experimental)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx expo prebuild --platform ios --no-install
+      - name: Install pods
+        working-directory: ios
+        run: pod install
+      - name: Build without code signing
+        working-directory: ios
+        run: |
+          xcodebuild -workspace Dayzo.xcworkspace -scheme Dayzo -configuration Release \
+            -sdk iphoneos -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" | tail -n 40
+      - name: Package .ipa
+        run: |
+          mkdir Payload
+          cp -R ios/build/Build/Products/Release-iphoneos/Dayzo.app Payload/
+          zip -qr Dayzo-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with: { name: dayzo-ipa, path: Dayzo-unsigned.ipa }

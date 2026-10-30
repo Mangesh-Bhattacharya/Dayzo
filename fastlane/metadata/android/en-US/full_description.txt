@@ -1,0 +1,18 @@
+Most budgeting apps give you a spreadsheet. Dayzo gives you one number.
+
+Enter your monthly income once. Dayzo divides it across the days of the month and shows what you can spend today. Log a spend and watch the number drop. Green means you are fine, amber means slow down, red means you are over.
+
+What you get
+- A daily budget that adapts to the length of each month
+- Two-tap spend logging with quick-add chips for common purchases
+- Today's budget, amount spent, and a progress bar that changes color as you use it up
+- Month pulse: are you ahead of or behind your plan this month
+- A streak of consecutive days under budget
+- A 14-day history chart and a category breakdown
+- Optional morning reminder with your number and a night check-in with today's summary
+- Indian rupee formatting (1,00,000)
+
+Private by design
+Everything stays on your phone. There are no accounts, no ads, no analytics and no servers. Delete the app and your data is gone.
+
+Dayzo is a one-time purchase. No subscriptions.
