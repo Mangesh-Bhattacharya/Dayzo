@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C } from './theme';
-import { AppState, CATEGORIES, dailyBudget, inr, spendsOn, streak, sum } from './logic';
+import { AppState, CATEGORIES, dailyBudget, inr, spendsOn, streak, sum, spendable } from './logic';
 import { Label } from './ui';
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -11,7 +11,7 @@ const BAR_H = 130;
 export default function History({ state }: { state: AppState }) {
   const insets = useSafeAreaInsets();
   const now = new Date();
-  const income = state.income ?? 0;
+  const income = spendable(state);
 
   const days = Array.from({ length: 14 }, (_, i) => {
     const d = new Date(now);

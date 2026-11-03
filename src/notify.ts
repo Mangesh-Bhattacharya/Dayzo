@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { AppState, dailyBudget, inr, spendsOn, sum } from './logic';
+import { AppState, dailyBudget, inr, spendsOn, sum, spendable } from './logic';
 
 const MORNING_HOUR = 8;
 const NIGHT_HOUR = 21;
@@ -63,7 +63,7 @@ export async function syncNotifications(state: AppState): Promise<void> {
 
     for (let i = 0; i < 7; i++) {
       const day = at(now, i, 0);
-      const budget = dailyBudget(state.income, day);
+      const budget = dailyBudget(spendable(state), day);
 
       if (state.morning) {
         const when = at(now, i, MORNING_HOUR);

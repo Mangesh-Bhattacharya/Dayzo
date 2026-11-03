@@ -17,7 +17,7 @@ Feedback and bug reports are welcome in [Issues](https://github.com/Mangesh-Bhat
 
 Enter monthly income, get one daily number (income / days in month), log spends, watch the number drop.
 Green -> amber -> red as the day's budget is used up. Morning (8:00) and night (21:30) local notifications.
-All data stays on-device (AsyncStorage). No accounts, no backend, no network calls.
+All data stays on-device (AsyncStorage). No accounts, no ads. The only network call is an optional Plus purchase check (see backend/README.md), sending a random install id.
 
 ## Run
     npm install
