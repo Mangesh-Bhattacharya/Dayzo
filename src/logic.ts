@@ -35,6 +35,8 @@ export type AppState = {
   income: number | null;
   /** Dayzo Plus entitlement (set by src/plus.ts after a verified purchase). */
   plus: boolean;
+  /** Random per-install id sent to the payment link and entitlement check. Contains no personal data. */
+  installId: string;
   /** Plus: fixed monthly bills (rent, EMI...) taken off income before the daily number. */
   bills: Bill[];
   /** Plus: amount to set aside each month before the daily number. */
@@ -45,9 +47,13 @@ export type AppState = {
   night: boolean;
 };
 
+export const newInstallId = () =>
+  Array.from({ length: 4 }, () => Math.random().toString(36).slice(2, 8).padEnd(6, '0')).join('') + Date.now().toString(36);
+
 export const initialState = (): AppState => ({
   income: null,
   plus: false,
+  installId: newInstallId(),
   bills: [],
   savings: 0,
   startedAt: Date.now(),

@@ -3,7 +3,7 @@ import { Platform, ScrollView, Switch, Text, TextInput, View } from 'react-nativ
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C } from './theme';
 import { AppState, Bill, dailyBudget, digits, inr, spendable, spendsToCsv, uid } from './logic';
-import { PLUS_PRICE_LABEL, canDevUnlock, paymentConfigured, startPurchase } from './plus';
+import { PLUS_PRICE_LABEL, canDevUnlock, checkEntitlement, paymentConfigured, startPurchase } from './plus';
 import { shareText } from './share';
 import { Label, Press } from './ui';
 
@@ -133,13 +133,25 @@ export default function Settings({
           </Text>
           <Press
             disabled={!paymentConfigured()}
-            onPress={async () => setNote((await startPurchase()) ? 'After paying, reopen the app to unlock.' : 'Could not open the payment page.')}
+            onPress={async () => setNote((await startPurchase(state.installId)) ? 'After paying, come back and tap "I\'ve paid".' : 'Could not open the payment page.')}
             style={{ backgroundColor: C.lime, borderRadius: 16, paddingVertical: 14, alignItems: 'center', marginTop: 14 }}
           >
             <Text style={{ color: C.black, fontWeight: '900' }}>
               {paymentConfigured() ? `Unlock Plus  ·  ${PLUS_PRICE_LABEL}` : 'Payments not set up yet'}
             </Text>
           </Press>
+          {paymentConfigured() && (
+            <Press
+              onPress={async () => {
+                const r = await checkEntitlement(state.installId);
+                if (r) onPatch({ plus: true });
+                else setNote(r === false ? 'No payment found yet. It can take a minute.' : 'Could not reach the server. Check your connection.');
+              }}
+              style={{ paddingVertical: 12, alignItems: 'center' }}
+            >
+              <Text style={{ color: C.lime, fontWeight: '800' }}>I've paid, unlock Plus</Text>
+            </Press>
+          )}
           {canDevUnlock() && (
             <Press onPress={() => onPatch({ plus: true })} style={{ paddingVertical: 12, alignItems: 'center' }}>
               <Text style={{ color: C.dim, fontSize: 12 }}>Dev build only: unlock Plus for testing</Text>
@@ -193,7 +205,7 @@ export default function Settings({
         <Label>Your data</Label>
       </View>
       <Text style={{ color: C.dim, fontSize: 13, lineHeight: 19, marginBottom: 12 }}>
-        Dayzo stores everything on this device only. Nothing is uploaded, and there are no accounts.
+        Dayzo stores everything on this device only, and there are no accounts. The only thing ever sent is a random install id, and only to confirm a Plus purchase.
       </Text>
       <Press
         onPress={() => {

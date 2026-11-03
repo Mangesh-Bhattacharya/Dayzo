@@ -1,0 +1,11 @@
+name = "dayzo-entitlement"
+main = "worker.ts"
+compatibility_date = "2026-01-01"
+
+# Create the namespace with:  npx wrangler kv namespace create PAID
+# then paste the id it prints below.
+[[kv_namespaces]]
+binding = "PAID"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Set the secret with:  npx wrangler secret put STRIPE_WEBHOOK_SECRET

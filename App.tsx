@@ -85,7 +85,7 @@ function Shell() {
             update((s) => ({ ...s, [k]: v }));
           }}
           onPatch={(p) => update((s) => ({ ...s, ...p }))}
-          onReset={() => setState({ ...initialState(), income: null })}
+          onReset={() => update((s0) => ({ ...initialState(), income: null, plus: s0.plus, installId: s0.installId }))}
         />
       )}
 
