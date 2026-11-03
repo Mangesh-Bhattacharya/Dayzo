@@ -29,8 +29,16 @@ export type Spend = {
   ts: number;
 };
 
+export type Bill = { id: string; label: string; amount: number };
+
 export type AppState = {
   income: number | null;
+  /** Dayzo Plus entitlement (set by src/plus.ts after a verified purchase). */
+  plus: boolean;
+  /** Plus: fixed monthly bills (rent, EMI...) taken off income before the daily number. */
+  bills: Bill[];
+  /** Plus: amount to set aside each month before the daily number. */
+  savings: number;
   startedAt: number;
   spends: Spend[];
   morning: boolean;
@@ -39,6 +47,9 @@ export type AppState = {
 
 export const initialState = (): AppState => ({
   income: null,
+  plus: false,
+  bills: [],
+  savings: 0,
   startedAt: Date.now(),
   spends: [],
   morning: true,
@@ -57,6 +68,22 @@ const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
 export const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 export const daysInMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
 export const dailyBudget = (income: number, d: Date) => Math.floor(income / daysInMonth(d));
+
+/** Income left for daily spending. Bills and savings only apply while Plus is active. */
+export function spendable(state: AppState): number {
+  if (state.income == null) return 0;
+  if (!state.plus) return state.income;
+  return Math.max(0, state.income - sum(state.bills) - Math.max(0, state.savings));
+}
+
+/** Spends as CSV text (Plus). Fields are quoted so labels with commas are safe. */
+export function spendsToCsv(spends: Spend[]): string {
+  const q = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  const rows = [...spends]
+    .sort((a, b) => a.ts - b.ts)
+    .map((x) => [dayKey(new Date(x.ts)), String(x.amount), q(x.label), x.category].join(','));
+  return ['date,amount,label,category', ...rows].join('\n');
+}
 
 /** Indian digit grouping: 1,00,000 */
 export function inr(n: number): string {
@@ -77,7 +104,7 @@ export const spendsOn = (spends: Spend[], d: Date) => {
   return spends.filter((s) => dayKey(new Date(s.ts)) === k);
 };
 
-export const sum = (spends: Spend[]) => spends.reduce((a, s) => a + s.amount, 0);
+export const sum = (spends: { amount: number }[]) => spends.reduce((a, s) => a + s.amount, 0);
 
 export function levelFor(spent: number, budget: number): Level {
   if (budget <= 0) return 'bad';
@@ -97,6 +124,7 @@ export function headline(level: Level, remaining: number, spent: number): string
 /** Allowance earned so far this month minus what was spent this month. */
 export function monthPulse(state: AppState, now: Date) {
   if (state.income == null) return 0;
+  const inc = spendable(state);
   let allowance = 0;
   // only count days since the user started, not the whole month
   const started = new Date(state.startedAt);
@@ -105,7 +133,7 @@ export function monthPulse(state: AppState, now: Date) {
       ? started.getDate()
       : 1;
   for (let day = firstDay; day <= now.getDate(); day++) {
-    allowance += dailyBudget(state.income, new Date(now.getFullYear(), now.getMonth(), day));
+    allowance += dailyBudget(inc, new Date(now.getFullYear(), now.getMonth(), day));
   }
   const spent = sum(
     state.spends.filter((s) => {
@@ -119,17 +147,18 @@ export function monthPulse(state: AppState, now: Date) {
 /** Consecutive days under budget, counting back from today (if still under) or yesterday. */
 export function streak(state: AppState, now: Date): number {
   if (state.income == null) return 0;
+  const inc = spendable(state);
   const start = new Date(state.startedAt);
   start.setHours(0, 0, 0, 0);
   let count = 0;
   const cursor = new Date(now);
   cursor.setHours(0, 0, 0, 0);
   // today counts only if currently under budget
-  const todayOk = sum(spendsOn(state.spends, cursor)) <= dailyBudget(state.income, cursor);
+  const todayOk = sum(spendsOn(state.spends, cursor)) <= dailyBudget(inc, cursor);
   if (todayOk) count++;
   cursor.setDate(cursor.getDate() - 1);
   for (let i = 0; i < 365 && cursor >= start; i++) {
-    const ok = sum(spendsOn(state.spends, cursor)) <= dailyBudget(state.income, cursor);
+    const ok = sum(spendsOn(state.spends, cursor)) <= dailyBudget(inc, cursor);
     if (!ok) break;
     count++;
     cursor.setDate(cursor.getDate() - 1);

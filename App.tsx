@@ -84,6 +84,7 @@ function Shell() {
             if (v) await ensurePermission();
             update((s) => ({ ...s, [k]: v }));
           }}
+          onPatch={(p) => update((s) => ({ ...s, ...p }))}
           onReset={() => setState({ ...initialState(), income: null })}
         />
       )}

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, levelColor } from './theme';
-import { AppState, catOf, dailyBudget, dayKey, headline, inr, levelFor, monthPulse, spendsOn, streak, sum } from './logic';
+import { AppState, catOf, dailyBudget, dayKey, headline, inr, levelFor, monthPulse, spendsOn, streak, sum, spendable } from './logic';
 import { AnimatedMoney, Label, Meter, Mood, Press } from './ui';
 import { shareText } from './share';
 
@@ -17,7 +17,7 @@ export default function Home({
 }) {
   const insets = useSafeAreaInsets();
   const now = new Date();
-  const budget = dailyBudget(state.income ?? 0, now);
+  const budget = dailyBudget(spendable(state), now);
   const todayKey = dayKey(now);
   // keyed on the date too, so the list refreshes when midnight passes
   const today = useMemo(

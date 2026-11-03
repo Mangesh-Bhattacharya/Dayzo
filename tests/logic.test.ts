@@ -1,4 +1,4 @@
-import { inr, dailyBudget, daysInMonth, levelFor, monthPulse, streak, spendsOn, sum, digits, initialState, AppState, Spend } from '../src/logic';
+import { spendable, spendsToCsv, inr, dailyBudget, daysInMonth, levelFor, monthPulse, streak, spendsOn, sum, digits, initialState, AppState, Spend } from '../src/logic';
 let fails = 0;
 const eq = (name: string, got: unknown, want: unknown) => {
   const ok = JSON.stringify(got) === JSON.stringify(want);
@@ -48,5 +48,12 @@ eq('streak null income', streak(st({ income: null }), now), 0);
 // across month boundary
 const nov2 = new Date(2026, 10, 2, 10);
 eq('streak across month', streak(st({}), nov2) >= 30, true);
+// Plus: bills + savings
+const plusSt = st({ plus: true, bills: [{ id: 'a', label: 'Rent', amount: 20000 }], savings: 10000 });
+eq('spendable plus', spendable(plusSt), 63000);
+eq('spendable free ignores bills', spendable({ ...plusSt, plus: false }), 93000);
+eq('spendable floors at 0', spendable({ ...plusSt, savings: 999999 }), 0);
+eq('pulse uses spendable', monthPulse(plusSt, now), 63000 / 31 > 0 ? Math.floor(63000 / 31) * 30 : 0);
+eq('csv escapes', spendsToCsv([{ id: '1', amount: 5, label: 'a "b", c', category: 'food', ts: new Date(2026, 9, 2, 12).getTime() }]), 'date,amount,label,category\n2026-10-02,5,"a ""b"", c",food');
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED');
 process.exit(fails ? 1 : 0);
